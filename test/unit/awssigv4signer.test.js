@@ -14,6 +14,7 @@ const { v4: uuidv4 } = require('uuid');
 const AwsSigv4Signer = require('../../lib/aws/AwsSigv4Signer');
 const AwsSigv4SignerError = require('../../lib/aws/errors');
 const { Connection } = require('../../index');
+const { Client, buildServer } = require('../utils');
 
 test('Sign with SigV4', (t) => {
   t.plan(2);
@@ -119,4 +120,78 @@ test('Sign with SigV4 success for aws v3 (with empty credentials and getCredenti
 
   AwsSigv4Signer(AwsSigv4SignerOptions);
   t.ok('Should succeed');
+});
+
+test('Basic aws v2 (promises)', (t) => {
+  t.plan(1);
+
+  function handler(req, res) {
+    res.setHeader('Content-Type', 'application/json;utf=8');
+    res.end(JSON.stringify({ hello: 'world' }));
+  }
+
+  buildServer(handler, ({ port }, server) => {
+    const mockCreds = {
+      accessKeyId: uuidv4(),
+      secretAccessKey: uuidv4(),
+    };
+
+    const AwsSigv4SignerOptions = {
+      getCredentials: (cb) => cb(null, mockCreds),
+    };
+    const client = new Client({
+      ...AwsSigv4Signer(AwsSigv4SignerOptions),
+      node: `http://localhost:${port}`,
+    });
+
+    client
+      .search({
+        index: 'test',
+        q: 'foo:bar',
+      })
+      .then(({ body }) => {
+        t.same(body, { hello: 'world' });
+        server.stop();
+      })
+      .catch(t.fail);
+  });
+});
+
+test('Basic aws v3 (promises)', (t) => {
+  t.plan(1);
+
+  function handler(req, res) {
+    res.setHeader('Content-Type', 'application/json;utf=8');
+    res.end(JSON.stringify({ hello: 'world' }));
+  }
+
+  buildServer(handler, ({ port }, server) => {
+    const mockCreds = {
+      accessKeyId: uuidv4(),
+      secretAccessKey: uuidv4(),
+    };
+
+    const mockRegion = 'us-west-2';
+
+    const AwsSigv4SignerOptions = {
+      credentials: mockCreds,
+      region: mockRegion,
+    };
+
+    const client = new Client({
+      ...AwsSigv4Signer(AwsSigv4SignerOptions),
+      node: `http://localhost:${port}`,
+    });
+
+    client
+      .search({
+        index: 'test',
+        q: 'foo:bar',
+      })
+      .then(({ body }) => {
+        t.same(body, { hello: 'world' });
+        server.stop();
+      })
+      .catch(t.fail);
+  });
 });
