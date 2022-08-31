@@ -88,12 +88,8 @@ async function getClient() {
 const { Client } = require('@opensearch-project/opensearch');
 const { AwsSigv4Signer } = require('@opensearch-project/opensearch/aws');
 const AWS = require('aws-sdk');
-// (Optional) load profile credentials from file
-AWS.config.update({
-  profile: "my-profile",
-});
 const client = new Client({
-  ...AwsSigv4Signer(awsConfig),
+  ...AwsSigv4Signer(AWS.config),
   node: endpoint,
 });
 ```
