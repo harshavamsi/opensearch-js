@@ -17,12 +17,6 @@ import Transport from '../Transport';
 import * as http from 'http';
 import { OpenSearchClientError } from '../errors';
 
-interface AwsSigv4SignerOptions {
-  getCredentials(callback: (err: any, credentials: Credentials|any|null) => void): void;
-  credentials: Credentials|undefined;
-  region: string;
-}
-
 interface AwsV3Sigv4SignerOptions {
   credentials: Credentials;
   region: string;
@@ -34,7 +28,7 @@ interface AwsSigv4SignerResponse {
   buildSignedRequestObject(request: any): http.ClientRequestArgs;
 }
 
-declare function AwsSigv4Signer(opts: AwsSigv4SignerOptions|AwsV3Sigv4SignerOptions): AwsSigv4SignerResponse;
+declare function AwsSigv4Signer(opts: AwsV3Sigv4SignerOptions|any): AwsSigv4SignerResponse;
 
 declare class AwsSigv4SignerError extends OpenSearchClientError {
   name: string;
