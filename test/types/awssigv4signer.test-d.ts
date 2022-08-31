@@ -22,7 +22,7 @@ const mockRegion = 'us-west-2';
 
 {
   const AwsSigv4SignerOptions = {
-    getCredentials: Promise.resolve(mockCreds),
+    getCredentials: (cb) => cb(null, mockCreds),
     credentials: mockCreds,
     region: mockRegion,
   };
