@@ -1,12 +1,15 @@
 # User Guide
 
-- [Initializing a Client](#initializing-a-client)
-  - [To authenticate with the Amazon OpenSearch Service use AwsSigv4Signer](#to-authenticate-with-the-amazon-opensearch-service-use-awssigv4signer)
-- [Create an Index](#create-an-index)
-- [Add a Document to the Index](#add-a-document-to-the-index)
-- [Search for the Document](#search-for-the-document)
-- [Delete the document](#delete-the-document)
-- [Delete the index](#delete-the-index)
+- [User Guide](#user-guide)
+  - [Initializing a Client](#initializing-a-client)
+    - [To authenticate with AWS V3 use AwsSigv4Signer](#to-authenticate-with-aws-v3-use-awssigv4signer)
+    - [To authenticate with AWS V2 use AwsSigv4Signer](#to-authenticate-with-aws-v2-use-awssigv4signer)
+      - [Using specific configuration](#using-specific-configuration)
+  - [Create an Index](#create-an-index)
+  - [Add a Document to the Index](#add-a-document-to-the-index)
+  - [Search for the Document](#search-for-the-document)
+  - [Delete the document](#delete-the-document)
+  - [Delete the index](#delete-the-index)
 
 
 ## Initializing a Client
@@ -37,25 +40,77 @@ var client = new Client({
 });
 ```
 
-### To authenticate with the [Amazon OpenSearch Service](https://aws.amazon.com/opensearch-service/) use AwsSigv4Signer
+### To authenticate with [AWS V3](https://aws.amazon.com/opensearch-service/) use AwsSigv4Signer
 
 ```javascript
 const endpoint = ""; // OpenSearch domain URL e.g. https://search-xxx.region.es.amazonaws.com
 const { Client } = require('@opensearch-project/opensearch');
 const { AwsSigv4Signer } = require('@opensearch-project/opensearch/aws');
-const { defaultProvider } = require("@aws-sdk/credential-provider-node");
+const { STSClient, AssumeRoleCommand } = require("@aws-sdk/client-sts");
+
+async function assumeRole(roleArn, region) {
+  const client = new STSClient({ region });
+  const response = await client.send(
+    new AssumeRoleCommand({
+      RoleArn: roleArn,
+      RoleSessionName: "aws-es-connection",
+    })
+  );
+  return {
+    accessKeyId: response.Credentials.AccessKeyId,
+    secretAccessKey: response.Credentials.SecretAccessKey,
+    sessionToken: response.Credentials.SessionToken,
+  };
+}
 
 async function getClient() {
-  const credentials = await defaultProvider()();
-  var client = new Client({
-    ...AwsSigv4Signer({
-      credentials: credentials,
-      region: "us-west-2",
-    }),
+  const creds = await assumeRole(
+    "arn:aws:iam::0123456789012:role/Administrator",
+    "us-east-1"
+  );
+  const awsConfig = {
+    region: "us-east-1",
+    credentials: creds,
+  };
+  const client = new Client({
+    ...AwsSigv4Signer(awsConfig),
     node: endpoint,
   });
   return client;
 }
+```
+
+### To authenticate with [AWS V2](https://aws.amazon.com/opensearch-service/) use AwsSigv4Signer
+
+```javascript
+const { Client } = require('@opensearch-project/opensearch');
+const { AwsSigv4Signer } = require('@opensearch-project/opensearch/aws');
+const AWS = require('aws-sdk');
+// (Optional) load profile credentials from file
+AWS.config.update({
+  profile: "my-profile",
+});
+const client = new Client({
+  ...AwsSigv4Signer(awsConfig),
+  node: endpoint,
+});
+```
+
+#### Using specific configuration
+
+```javascript
+
+const { Client } = require('@opensearch-project/opensearch');
+const { AwsSigv4Signer } = require('@opensearch-project/opensearch/aws');
+const AWS = require('aws-sdk');
+
+const awsConfig = new AWS.Config({
+  // see https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/Config.html#constructor-property
+});
+const client = new Client({
+  ...AwsSigv4Signer(awsConfig),
+  node: endpoint,
+});
 ```
 
 ## Create an Index
@@ -80,7 +135,7 @@ async function getClient() {
   console.log(response.body);
 ```
 
-## Add a Document to the Index 
+## Add a Document to the Index
 
 ```javascript
   var document = {

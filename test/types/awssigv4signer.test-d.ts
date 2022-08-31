@@ -21,7 +21,11 @@ const mockCreds = {
 const mockRegion = 'us-west-2';
 
 {
-  const AwsSigv4SignerOptions = { credentials: mockCreds, region: mockRegion };
+  const AwsSigv4SignerOptions = {
+    getCredentials: Promise.resolve(mockCreds),
+    credentials: mockCreds,
+    region: mockRegion,
+  };
 
   const auth = AwsSigv4Signer(AwsSigv4SignerOptions);
 
