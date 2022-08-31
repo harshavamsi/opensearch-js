@@ -37,4 +37,4 @@ declare class AwsSigv4SignerError extends OpenSearchClientError {
   constructor(message: string, data: any);
 }
 
-export { AwsSigv4Signer, AwsSigv4SignerOptions, AwsSigv4SignerResponse, AwsSigv4SignerError };
+export { AwsSigv4Signer, AwsV3Sigv4SignerOptions, AwsSigv4SignerResponse, AwsSigv4SignerError };
