@@ -49,7 +49,7 @@ test('Sign with SigV4', (t) => {
   t.hasProp(signedRequest.headers, 'Authorization');
 });
 
-test('Sign with SigV4 failure (with empty region)', (t) => {
+test('Sign with SigV4 failure for aws v3 (with empty region)', (t) => {
   t.plan(2);
 
   const mockCreds = {
@@ -70,8 +70,8 @@ test('Sign with SigV4 failure (with empty region)', (t) => {
   }
 });
 
-test('Sign with SigV4 success (with empty region and getCredentials function)', (t) => {
-  t.plan(2);
+test('Sign with SigV4 success for aws v2 (with empty region and getCredentials function)', (t) => {
+  t.plan(1);
 
   const mockCreds = {
     accessKeyId: uuidv4(),
@@ -83,16 +83,11 @@ test('Sign with SigV4 success (with empty region and getCredentials function)', 
     credentials: mockCreds,
   };
 
-  try {
-    AwsSigv4Signer(AwsSigv4SignerOptions);
-    t.fail('Should fail');
-  } catch (err) {
-    t.ok(err instanceof AwsSigv4SignerError);
-    t.equal(err.message, 'Region cannot be empty');
-  }
+  AwsSigv4Signer(AwsSigv4SignerOptions);
+  t.ok('Should succeed');
 });
 
-test('Sign with SigV4 failure (with empty credentials)', (t) => {
+test('Sign with SigV4 failure for aws v3 (with empty credentials)', (t) => {
   t.plan(2);
 
   const mockRegion = 'us-west-2';
@@ -108,4 +103,20 @@ test('Sign with SigV4 failure (with empty credentials)', (t) => {
     t.ok(err instanceof AwsSigv4SignerError);
     t.equal(err.message, 'Credentials cannot be empty');
   }
+});
+
+test('Sign with SigV4 success for aws v3 (with empty credentials and getCredentials function)', (t) => {
+  t.plan(1);
+
+  const mockCreds = {
+    accessKeyId: uuidv4(),
+    secretAccessKey: uuidv4(),
+  };
+
+  const AwsSigv4SignerOptions = {
+    getCredentials: (cb) => cb(null, mockCreds),
+  };
+
+  AwsSigv4Signer(AwsSigv4SignerOptions);
+  t.ok('Should succeed');
 });
