@@ -2,15 +2,15 @@
 
 - [User Guide](#user-guide)
   - [Initializing a Client](#initializing-a-client)
-    - [To authenticate with AWS V3 use AwsSigv4Signer](#to-authenticate-with-aws-v3-use-awssigv4signer)
-    - [To authenticate with AWS V2 use AwsSigv4Signer](#to-authenticate-with-aws-v2-use-awssigv4signer)
-      - [Using specific configuration](#using-specific-configuration)
+    - [To authenticate with Amazon OpenSearch Service using AwsSigv4Signer](#to-authenticate-with-amazon-opensearch-service-using-awssigv4signer)
+      - [AWS V3](#aws-v3)
+      - [AWS V2 global configuration](#aws-v2-global-configuration)
+      - [AWS V2 specific configuration](#aws-v2-specific-configuration)
   - [Create an Index](#create-an-index)
   - [Add a Document to the Index](#add-a-document-to-the-index)
   - [Search for the Document](#search-for-the-document)
   - [Delete the document](#delete-the-document)
   - [Delete the index](#delete-the-index)
-
 
 ## Initializing a Client
 ```javascript
@@ -40,7 +40,9 @@ var client = new Client({
 });
 ```
 
-### To authenticate with [AWS V3](https://aws.amazon.com/opensearch-service/) use AwsSigv4Signer
+### To authenticate with [Amazon OpenSearch Service](https://aws.amazon.com/opensearch-service/) using AwsSigv4Signer
+
+#### AWS V3
 
 ```javascript
 const endpoint = ""; // OpenSearch domain URL e.g. https://search-xxx.region.es.amazonaws.com
@@ -80,7 +82,7 @@ async function getClient() {
 }
 ```
 
-### To authenticate with [AWS V2](https://aws.amazon.com/opensearch-service/) use AwsSigv4Signer
+#### AWS V2 global configuration
 
 ```javascript
 const { Client } = require('@opensearch-project/opensearch');
@@ -96,7 +98,7 @@ const client = new Client({
 });
 ```
 
-#### Using specific configuration
+#### AWS V2 specific configuration
 
 ```javascript
 
